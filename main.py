@@ -197,6 +197,8 @@ def get_recent_emails(num_emails=5):
     return emails
 
 
+import requests
+
 def extract_meeting_details(email_content):
     """
     Extract meeting details (date, time, and purpose) from the email content using Ollama.
@@ -212,29 +214,25 @@ def extract_meeting_details(email_content):
     Text: {email_content}
     """
     
-    result = ""
     try:
-        for response in ollama.generate(model="llama3.2", prompt=prompt):
-            if isinstance(response, str):
-                result += response
-            else:
-                result += response.get('response', '')
-
+        # Make a POST request to the Ollama API
+        response = requests.post(
+            f"{OLLAMA_URL}/models/llama3.2/run",
+            json={"prompt": prompt}
+        )
+        response.raise_for_status()  # Raise an error for bad responses
+        
+        # Parse response from Ollama
+        result = response.json().get('response', '')
+        
+        # Process and parse the JSON response
+        details = ast.literal_eval(result.strip())
+        if details.get('date') and details.get('time') and details.get('description'):
+            return details
     except Exception as e:
-        logging.error(f"Error generating response from Ollama: {e}")
-        return None
-    
-    if result:
-        try:
-            details = ast.literal_eval(result.strip())
-            logging.debug(f"Extracted meeting details: {details}")
-
-            if details.get('date') and details.get('time') and details.get('description'):
-                return details
-        except Exception as e:
-            logging.error(f"Error parsing Ollama response: {e}")
-            return None
+        logging.error(f"Error interacting with Ollama API: {e}")
     return None
+
 
 def process_emails_and_add_to_trello(list_name="Meetings"):
     emails = get_recent_emails(num_emails=5)
