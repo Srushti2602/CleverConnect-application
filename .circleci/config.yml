@@ -1,13 +1,20 @@
 version: 2.1
 
+executors:
+  docker-compose-executor:
+    docker:
+      - image: cimg/python:3.8  # Primary container for running tests
+      - image: ollama/ollama:latest
+        name: ollama  # Name to refer to this service in networking
+    working_directory: ~/repo
+
 jobs:
   email_fetch_and_process:
-    docker:
-      - image: ollama/ollama:latest  # Use the Ollama Docker image to run the Ollama model
+    executor: docker-compose-executor
     environment:
-      OLLAMA_URL: "http://127.0.0.1:11434"  # Set the Ollama URL for API access
+      OLLAMA_URL: "http://ollama:11434"
     steps:
-      - checkout  # Check out the code in the repository
+      - checkout
 
       - run:
           name: Install Python Dependencies
@@ -17,11 +24,13 @@ jobs:
             pip3 install -r requirements.txt
 
       - run:
+          name: Wait for Ollama to Start
+          command: sleep 10  # Adjust if needed
+
+      - run:
           name: Run Ollama Model
           command: |
-            export OLLAMA_URL="http://127.0.0.1:11434"
-            
-            # Run your Python script that calls the Ollama API
+            export OLLAMA_URL="http://ollama:11434"
             python3 main.py
 
 workflows:
