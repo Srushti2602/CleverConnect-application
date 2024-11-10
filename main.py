@@ -14,6 +14,7 @@ import re
 
 # Load environment variables
 load_dotenv()
+OLLAMA_URL = "http://ollama:11434"
 
 # Initialize Slack Bolt app with OAuth tokens
 app = App(token=os.getenv("SLACK_BOT_TOKEN"))
@@ -194,6 +195,7 @@ def get_recent_emails(num_emails=5):
         }
         emails.append(email_info)
     return emails
+
 
 def extract_meeting_details(email_content):
     """
