@@ -1,0 +1,27 @@
+version: 2.1
+
+jobs:
+  email_fetch_and_process:
+    docker:
+      - image: cimg/python:3.8  # This image has Python 3.8 preinstalled, provided by CircleCI
+    steps:
+      - checkout  # Pulls down your code from the version control repository (e.g., GitHub)
+      - run:
+          name: Install dependencies
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt  # Installs all Python dependencies listed in requirements.txt
+      - run:
+          name: Fetch and Process Emails
+          command: |
+            python fetch_emails.py  # Runs the script to fetch and process emails
+      - run:
+          name: Update Trello with Meeting Details
+          command: |
+            python update_trello.py  # Runs the script to add meeting details to Trello
+
+workflows:
+  version: 2
+  email_to_trello_workflow:
+    jobs:
+      - email_fetch_and_process
