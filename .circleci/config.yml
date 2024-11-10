@@ -1,50 +1,39 @@
 version: 2.1
 
-executors:
-  docker-compose-executor:
-    docker:
-      - image: cimg/python:3.8  # Primary container for running tests
-      - image: ollama/ollama:latest
-        name: ollama  # Name to refer to this service in networking
-    working_directory: ~/repo
-
 jobs:
   email_fetch_and_process:
-    executor: docker-compose-executor
+    machine:
+      image: ubuntu-2004:202101-01  # CircleCI VM image
     environment:
-      OLLAMA_URL: "http://ollama:11434"
+      OLLAMA_URL: "http://localhost:11434"
     steps:
       - checkout
 
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python3-pip curl
+      
       - run:
           name: Install Python Dependencies
           command: |
             pip3 install -r requirements.txt
 
       - run:
-          name: Poll for Ollama Readiness
+          name: Download and Start Ollama
           command: |
-            for i in {1..10}; do
-              if curl -s --head "http://ollama:11434" | grep "200 OK" > /dev/null; then
-                echo "Ollama is ready!"
-                ready=true
-                break
-              else
-                echo "Waiting for Ollama to be ready..."
-                sleep 5
-              fi
-            done
-
-            # Final check if Ollama is ready, fail if not
-            if [ "$ready" != "true" ]; then
-              echo "Ollama did not become ready in time. Exiting."
-              exit 1
-            fi
+            # Commands to install Ollama on the VM
+            # For example:
+            curl -LO https://ollama.com/install.sh
+            bash install.sh
+            nohup ollama serve --port 11434 &
+            sleep 10  # Wait for Ollama to start
 
       - run:
           name: Run Ollama Model
           command: |
-            export OLLAMA_URL="http://ollama:11434"
+            export OLLAMA_URL="http://localhost:11434"
             python3 main.py
 
 workflows:
