@@ -23,7 +23,12 @@ jobs:
 
       - run:
           name: Wait for Ollama to Start
-          command: sleep 10  # Adjust if needed
+          command: |
+            until curl -s "http://ollama:11434" >/dev/null; do
+              echo "Waiting for Ollama to start..."
+              sleep 5
+            done
+            echo "Ollama is up and running."
 
       - run:
           name: Run Ollama Model
