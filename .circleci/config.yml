@@ -12,13 +12,9 @@ jobs:
             python -m pip install --upgrade pip
             pip install -r requirements.txt  # Installs all Python dependencies listed in requirements.txt
       - run:
-          name: Fetch and Process Emails
+          name: Run Main Script
           command: |
-            python fetch_emails.py  # Runs the script to fetch and process emails
-      - run:
-          name: Update Trello with Meeting Details
-          command: |
-            python update_trello.py  # Runs the script to add meeting details to Trello
+            python main.py  # Runs the main script to handle all operations
 
 workflows:
   version: 2
