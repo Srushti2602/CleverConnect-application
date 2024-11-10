@@ -5,3 +5,4 @@ py-trello==0.20.1    # For Trello API integration
 websocket-client==1.8.0    # Required for real-time communication in Slack
 nltk==3.9.1                # For natural language processing in email summarization
 python-dotenv==1.0.0       # To manage environment variables
+slack_bolt==1.12.0
