@@ -1,0 +1,25 @@
+name: Ollama Workflow
+
+on:
+  workflow_dispatch:  # This allows manual triggering of the workflow
+
+jobs:
+  run-ollama:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama Server
+        run: ollama serve &
+
+      - name: Pull Model
+        run: ollama pull phi3:mini
+
+      - name: Call Ollama API
+        run: |
+          curl -d '{"model": "phi3:mini", "stream": false, "prompt": "Whatever I say, answer with Yes"}' http://localhost:11434/api/generate
