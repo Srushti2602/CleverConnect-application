@@ -3,33 +3,19 @@ version: 2.1
 jobs:
   email_fetch_and_process:
     docker:
-      - image: cimg/python:3.8  # Main Docker image with Python
-      - image: ollama/ollama:3.2  # Secondary Docker image for Ollama version 3.2
-        name: ollama
-        ports:
-          - 11434:11434  # Expose Ollama's port
-
+      - image: ollama/ollama:latest  # Use the latest version of the Ollama image
     steps:
-      - checkout  # Pull down your code from the repository
-      
+      - checkout  # Pulls down your code from the repository
       - run:
-          name: Install dependencies
+          name: Install Python dependencies
           command: |
             python -m pip install --upgrade pip
-            pip install -r requirements.txt  # Install Python dependencies
-
+            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - run:
-          name: Wait for Ollama to Start
+          name: Run Ollama model
           command: |
-            # Wait for Ollama to be fully available before running the main script
-            until curl -s http://ollama:11434/health; do
-              echo "Waiting for Ollama to be ready..."
-              sleep 5
-            done
-
-      - run:
-          name: Run Main Script
-          command: python main.py  # Run your main Python script
+            export OLLAMA_URL="http://127.0.0.1:11434"  # Set the Ollama URL
+            ollama run llama3.2 "<your_prompt>"  # Replace <your_prompt> with the actual prompt
 
 workflows:
   version: 2
