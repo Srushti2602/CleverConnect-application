@@ -3,19 +3,21 @@ version: 2.1
 jobs:
   email_fetch_and_process:
     docker:
-      - image: ollama/ollama:latest  # Use the latest version of the Ollama image
+      - image: python:3.8  # Use a Python base image
+      - image: ollama/ollama:latest  # Add Ollama as a secondary service container
+        name: ollama
     steps:
-      - checkout  # Pulls down your code from the repository
+      - checkout
       - run:
-          name: Install Python dependencies
+          name: Install Dependencies
           command: |
             python -m pip install --upgrade pip
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - run:
-          name: Run Ollama model
+          name: Run Ollama Model
           command: |
-            export OLLAMA_URL="http://127.0.0.1:11434"  # Set the Ollama URL
-            ollama run llama3.2 "<your_prompt>"  # Replace <your_prompt> with the actual prompt
+            export OLLAMA_URL="http://ollama:11434"
+            ollama run llama3.2 "<your_prompt>"
 
 workflows:
   version: 2
